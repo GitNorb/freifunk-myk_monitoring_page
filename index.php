@@ -181,7 +181,7 @@ function print_table($router_info, $titel)
 
 {
 	# Style
-	echo "<h2>$titel</h2> <br />";
+	echo "<h2>$titel</h2>";
 	?>
 
 	<TABLE>
@@ -200,7 +200,7 @@ function print_table($router_info, $titel)
 
 	}
 
-	echo "</TABLE>\n\n";
+	echo "</TABLE><br />";
 }
 
 # Gibt 1 zurück, wenn String mit Substring startet
