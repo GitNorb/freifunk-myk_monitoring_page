@@ -2,10 +2,10 @@
 
 
 # Skript zum Auswerten der Freifunk-Json
-# 1. Lese Node-ID aus csv
-# 2. Lade json 
-# 3. Zeite Inhalt in einer Tablelle dargestellt:
-# Name - Online - Letze Meldung - IP-Adresse - Node-ID
+# 1. Lese Node-ID aus nodes.txt
+# 2. Lade json
+# 3. Suche eigene Nodes in json
+# 4. Zeige Infos zu eigenen Nodes in Tabelle
 
 ##### MAIN #####
 
@@ -40,7 +40,7 @@ print_html_head($now);
 print_table($router_offline,"Offline");
 
 # Zeige Tabelle Uplink-Router
-print_table($router_uplink,"Uplink");
+print_table($router_uplink,"Online mit Uplink");
 
 # Zeige Tabelle Online
 print_table($router_online,"Online");
@@ -170,7 +170,7 @@ if ($min > 0)
 {
 	return "$min Minute(n)";
 }
-if ($sek > 0)
+if ($sek > 0 or $sek == 0)
 {
 	return "$sek Sekunde(n)";
 }
