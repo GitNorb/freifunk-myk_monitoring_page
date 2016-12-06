@@ -170,11 +170,15 @@ if ($min > 0)
 {
 	return "$min Minute(n)";
 }
-if ($sek > 0 or $sek == 0)
+if ($sek > 0)
 {
 	return "$sek Sekunde(n)";
 }
+if ($sek < 0 or $sek = 0)
+{
+	return "einige Sekunden";
 
+}
 }
 
 function print_table($router_info, $titel)
@@ -193,7 +197,8 @@ function print_table($router_info, $titel)
 	echo "<td>".$router['hostname']."</td>";
         echo "<td>".$router['node_id']."</td>";
         echo "<td>".$router['lastseen']."</td>";
-        echo "<td>".$router['ipv6']."</td>";
+	$ip = $router['ipv6'];
+        echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
         #echo "<td>".$router['online']."</td>";
         #echo "<td>".$router['uplink']."</td>";
         echo "</tr>";
@@ -255,6 +260,8 @@ function print_html_head($now)
 # Gibt unterer Teil der Seite aus
 function print_html_bot()
 {
+echo "Quellcode (nicht immer aktuell): https://github.com/GitNorb/freifunk-myk_monitoring_page";
+
 echo "</body>\n</html>";
 }
 
