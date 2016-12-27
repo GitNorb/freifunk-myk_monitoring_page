@@ -70,7 +70,7 @@ function search_own_router($all_nodes,$own_nodes)
 				array_push($own_router_index,$i);
 			}
 		}
-	$i=$i+1;
+		$i=$i+1;
 	}
 	return $own_router_index;
 }
@@ -107,7 +107,7 @@ function catch_information($nodes,$index_own_nodes,$status)
 		$online = $flags['online']; # WICHTIG
 		$uplink = $flags['uplink']; # WICHTIG
 		$inf_node = array("lastseen" => $lastseen, "hostname" => $hostname, "node_id" => $node_id,"ipv6" => $ipv6,"online" => $online,"uplink" => $uplink);
-		
+
 		# Hier Entscheide, ob offline, uplink oder online
 		if ($status == "offline")
 		{
@@ -138,7 +138,7 @@ function catch_information($nodes,$index_own_nodes,$status)
 		}
 		if ($push)
 		{
-		array_push($own_nodes_list,$inf_node);
+			array_push($own_nodes_list,$inf_node);
 		}	
 	}	
 	return $own_nodes_list;
@@ -146,39 +146,39 @@ function catch_information($nodes,$index_own_nodes,$status)
 
 function format_date($zeit)
 {
-global $now; # Nimm die Globale now
-$in_time = strtotime($zeit);
+	global $now; # Nimm die Globale now
+	$in_time = strtotime($zeit);
 
-$now = time(); # TODO Hier Serverzeit
+	$now = time(); # TODO Hier Serverzeit
 
-$differenz = $now - $in_time;
-$tag  = floor($differenz / (3600*24));
-$std  = floor($differenz / 3600 % 24);
-$min  = floor($differenz / 60 % 60);
-$sek  = floor($differenz % 60);
+	$differenz = $now - $in_time;
+	$tag  = floor($differenz / (3600*24));
+	$std  = floor($differenz / 3600 % 24);
+	$min  = floor($differenz / 60 % 60);
+	$sek  = floor($differenz % 60);
 
 
-if ($tag > 0)
-{
-	return "$tag Tag(e)";
-}
-if ($std > 0)
-{
-	return "$std Stunde(n)";
-}
-if ($min > 0)
-{
-	return "$min Minute(n)";
-}
-if ($sek > 0)
-{
-	return "$sek Sekunde(n)";
-}
-if ($sek < 0 or $sek = 0)
-{
-	return "einige Sekunden";
+	if ($tag > 0)
+	{
+		return "$tag Tag(e)";
+	}
+	if ($std > 0)
+	{
+		return "$std Stunde(n)";
+	}
+	if ($min > 0)
+	{
+		return "$min Minute(n)";
+	}
+	if ($sek > 0)
+	{
+		return "$sek Sekunde(n)";
+	}
+	if ($sek < 0 or $sek = 0)
+	{
+		return "einige Sekunden";
 
-}
+	}
 }
 
 function print_table($router_info, $titel)
@@ -186,22 +186,22 @@ function print_table($router_info, $titel)
 {
 	# Style
 	echo "<h2>$titel</h2>";
-	?>
+?>
 
 	<TABLE>
 	<tr><th>Hostname</th><th>Node-ID</th><th>Letze Nachricht vor</th><th>IP</th><tr>
-	<?php
+<?php
 	# Tabelle füllen 
 	foreach ($router_info as $router){
-	echo "<tr>";
-	echo "<td>".$router['hostname']."</td>";
-        echo "<td>".$router['node_id']."</td>";
-        echo "<td>".$router['lastseen']."</td>";
-	$ip = $router['ipv6'];
-        echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
-        #echo "<td>".$router['online']."</td>";
-        #echo "<td>".$router['uplink']."</td>";
-        echo "</tr>";
+		echo "<tr>";
+		echo "<td>".$router['hostname']."</td>";
+		echo "<td>".$router['node_id']."</td>";
+		echo "<td>".$router['lastseen']."</td>";
+		$ip = $router['ipv6'];
+		echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
+		#echo "<td>".$router['online']."</td>";
+		#echo "<td>".$router['uplink']."</td>";
+		echo "</tr>";
 
 	}
 
@@ -211,8 +211,8 @@ function print_table($router_info, $titel)
 # Gibt 1 zurück, wenn String mit Substring startet
 function startsWith($haystack, $needle)
 {
-     $length = strlen($needle);
-     return (substr($haystack, 0, $length) === $needle);
+	$length = strlen($needle);
+	return (substr($haystack, 0, $length) === $needle);
 }
 
 # Gibt oberer Teil der Seite aus
@@ -221,48 +221,24 @@ function print_html_head($now)
 ?>
 <!DOCTYPE html>
 <html>
-        <head>
-        <meta charset='UTF-8' />
-        <title> Freifunk</title>
-        </head>
-        <body>
-	<?php
+	<head>
+	<meta charset='UTF-8' />
+	<title> Freifunk</title>
+	<link rel=stylesheet type="text/css" href="css/style.css">
+	</head>
+	<body>
+<?php
 	$datum = date("d.m.y",$now);
 	$uhrzeit = date("G:i",$now);
-        echo "<h1>Status Nodes $datum um $uhrzeit Uhr</h1> <br />";
-	?>
-	<style>
-	table {
-    		width:100%;
-	}
-	table, th, td {
-    		border: 1px solid black;
-    		border-collapse: collapse;
-	}
-	th, td {
-    		padding: 5px;
-    		text-align: left;
-	}
-	table#t01 tr:nth-child(even) {
-    		background-color: #eee;
-	}
-	table#t01 tr:nth-child(odd) {
-   		background-color:#fff;
-	}
-	table#t01 th {
-    		background-color: black;
-    	color: white;
-	}
-	</style>
-<?php
+	echo "<h1>Status Nodes $datum um $uhrzeit Uhr</h1> <br />";
 }
 
 # Gibt unterer Teil der Seite aus
 function print_html_bot()
 {
-echo "Quellcode (nicht immer aktuell): https://github.com/GitNorb/freifunk-myk_monitoring_page";
+	echo "Quellcode (nicht immer aktuell): https://github.com/GitNorb/freifunk-myk_monitoring_page";
 
-echo "</body>\n</html>";
+	echo "</body>\n</html>";
 }
 
 # List die Datei mit den Node-IDs ein und gibt ein Array mit dienen zurück
