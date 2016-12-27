@@ -199,12 +199,9 @@ function print_table($router_info, $titel)
 		echo "<td>".$router['lastseen']."</td>";
 		$ip = $router['ipv6'];
 		echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
-		#echo "<td>".$router['online']."</td>";
-		#echo "<td>".$router['uplink']."</td>";
 		echo "</tr>";
 
 	}
-
 	echo "</TABLE><br />";
 }
 
@@ -222,9 +219,9 @@ function print_html_head($now)
 <!DOCTYPE html>
 <html>
 	<head>
-	<meta charset='UTF-8' />
-	<title> Freifunk</title>
-	<link rel=stylesheet type="text/css" href="css/style.css">
+		<meta charset='UTF-8' />
+		<title> Freifunk</title>
+		<link rel=stylesheet type="text/css" href="css/style.css">
 	</head>
 	<body>
 <?php
@@ -236,8 +233,9 @@ function print_html_head($now)
 # Gibt unterer Teil der Seite aus
 function print_html_bot()
 {
-	echo "Quellcode (nicht immer aktuell): https://github.com/GitNorb/freifunk-myk_monitoring_page";
-
+	echo "Quellcode (nicht immer aktuell):"; 
+	$adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
+	echo "<td> <a href=\"".$adresse."\">".$adresse."</a> </td>";
 	echo "</body>\n</html>";
 }
 
