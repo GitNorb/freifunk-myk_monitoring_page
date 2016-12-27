@@ -1,0 +1,154 @@
+<?php
+
+class ffNodeInfo extends WireData implements Module, ConfigurableModule{
+    protected $cache = false;
+    protected $cache_node = array();
+    protected $src, $nodes;
+
+    public static function getModuleInfo() {
+        return array(
+            'title' => __('FF Node Info'),
+            'version' => '005',
+            'author' => 'Kreativmonkey',
+            'summary' => __('Save node information for Freifunk'),
+            'singular' => true,
+            'autoload' => true
+        );
+    }
+
+    public function ___install() {
+      // Creating fields and templates for the Node manegemant
+    }
+
+    public function init() {
+      if (isset ($this->data ['src']))
+          $this->src = $this->data ['src'];
+
+      // run the module every 2 minutes
+      $this->addHook('LazyCron::every2Minutes', $this, 'set_nodeinfo');
+    }
+
+    protected function cache_data() {
+        $htmlcache = file_get_contents($this->src);
+        $this->cache = json_decode($htmlcache);
+        $this->gen_nodecache();
+    }
+
+    protected function gen_nodecache() {
+        foreach($this->cache->nodes as $node) {
+            $this->cache_node[base64_encode(strtoupper($node->nodeinfo->node_id))] = $node;
+        }
+        $this->cache=false;
+    }
+
+    public function set_nodeinfo(HookEvent $e){
+        $this->cache_data();
+        $nodes = wire('pages')->find("template=node, key!=''");
+        foreach($nodes as $node){
+          $data = $this->get_nodeinfo($node->title);
+
+          $node->of(false);
+          if(!empty($data)){
+            // Override exist name only if a new one.
+            if($data['name'] == 'unbekannt' && empty($node->subtitle)){
+              $node->subtitle = $data['name'];
+            } elseif($data['name'] != 'unbekannt') {
+              $node->subtitle = $data['name'];
+            }
+            $node->latitude = floatval(str_replace(',', '.', $data['geo']['latitude']));
+            $node->longitude = floatval(str_replace(',', '.', $data['geo']['longitude']));
+            $node->lastseen = strtotime($data['lastseen']);
+            $node->node_hardware = $data['hardware'];
+            $node->node_firmware = $data['firmware'];
+            $node->ipv6 = $data['ip'];
+            $node->online = $data['online'];
+            if ($node->isChanged('latitude') ||
+                $node->isChanged('longitude')){
+                $node->address = $this->get_address(str_replace(',', '.', $node->latitude), str_replace(',','.',$node->longitude));
+              }
+          } else {
+            $node->online = false;
+          }
+          if($node->isChanged()){
+            // Save only if the Page has Changes
+            $node->save();
+          }
+          $node->of(true);
+        }
+
+        $this->message(__('Node Informationen aktualisiert'));
+    }
+
+    public function get_address($latitude, $longitude){
+      if(empty($latitude)) return "";
+      $osm = json_decode(file_get_contents("https://nominatim.openstreetmap.org/reverse?format=json&lat={$latitude}&lon={$longitude}&zoom=16&addressdetails=1&email=info@freifunk-myk.de"));
+      if(isset($osm->address->city)) {
+        $address = $osm->address->city;
+      } elseif (isset($osm->address->city_district)){
+        $address = $osm->address->city_district;
+      }elseif (isset($osm->address->town)) {
+        $address = $osm->address->town;
+      } elseif (isset($osm->address->village)) {
+        $address = $osm->address->village;
+      } else {
+        $address = __('no address found');
+        $this->log->error(sprintf(__('no address found for %s:%s'), $latitude, $longitude));
+      }
+      if(isset($osm->address->road) && isset($address)){
+        $address .= ", ".$osm->address->road;
+      }
+      return $address;
+    }
+
+    public function get_nodeinfo($mac) {
+        $mac = strtoupper(str_replace(':', '', $mac));
+        $data = array();
+
+        if(!isset($this->cache_node[base64_encode($mac)])) return $data;
+        $info = $this->cache_node[base64_encode($mac)];
+
+        $ip = '';
+        if(isset($info->nodeinfo->network->addresses)) {
+            foreach($info->nodeinfo->network->addresses as $tip) {
+                if(substr($tip, 0, 4) == '2a01') $ip = $tip;
+            }
+        }
+
+        $data = array(
+            'addresses' => (isset($info->nodeinfo->network->addresses) ? $info->nodeinfo->network->addresses : ""),
+            'hardware' => (isset($info->nodeinfo->hardware->model) ? $info->nodeinfo->hardware->model : "empty"),
+            'firmware' => (isset($info->nodeinfo->software->firmware->release) ? $info->nodeinfo->software->firmware->release : ""),
+            'autoupdater_state' => (isset($info->nodeinfo->software->autoupdater->enabled) ? $info->nodeinfo->software->autoupdater->enabled : ""),
+            'name' => (isset($info->nodeinfo->hostname) ? $info->nodeinfo->hostname : ""),
+            'lastseen' => (isset($info->lastseen) ? $info->lastseen : ""),
+            'geo' => array( 'latitude' => (isset($info->nodeinfo->location->latitude) ? $info->nodeinfo->location->latitude : ""),
+                            'longitude' => (isset($info->nodeinfo->location->longitude) ? $info->nodeinfo->location->longitude : ""),
+                          ),
+            'ip' => $ip,
+            'online' => $info->flags->online
+        );
+        return $data;
+    }
+
+    public function hookModuleSave(HookEvent $event) {
+       $className = $event->arguments [0];
+       if ($className != get_class($this)) return;
+       $this->validateConfiguration();
+     }
+
+    static public function getModuleConfigInputfields(array $data) {
+        $inputfields = new InputfieldWrapper ();
+
+        $srcField = wire('modules')->get('InputfieldText');
+        $srcField->name = 'src';
+        $srcField->columnWidth = 100;
+        $srcField->label = __('JSON URL');
+        $srcField->required = 1;
+        if (isset ($data ['src']))
+            $srcField->value = $data ['src'];
+        $srcField->description = __('The URL to the JSON file with all node data.');
+        $inputfields->add($srcField);
+
+        return $inputfields;
+    }
+}
