@@ -184,7 +184,6 @@ function format_date($zeit)
 function print_table($router_info, $titel)
 
 {
-	# Style
 	echo "<h2>$titel</h2>";
 ?>
 
@@ -205,6 +204,7 @@ function print_table($router_info, $titel)
 	echo "</TABLE><br />";
 }
 
+# Hilfsfunktion
 # Gibt 1 zurück, wenn String mit Substring startet
 function startsWith($haystack, $needle)
 {
@@ -233,7 +233,7 @@ function print_html_head($now)
 # Gibt unterer Teil der Seite aus
 function print_html_bot()
 {
-	echo "Quellcode (nicht immer aktuell):"; 
+	echo "Quellcode"; 
 	$adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
 	echo "<td> <a href=\"".$adresse."\">".$adresse."</a> </td>";
 	echo "</body>\n</html>";
