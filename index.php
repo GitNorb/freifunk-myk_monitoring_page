@@ -223,13 +223,13 @@ function print_html_head($now)
 <html>
         <head>
         <meta charset='UTF-8' />
-        <title> Freifunk Brohl</title>
+        <title> Freifunk</title>
         </head>
         <body>
 	<?php
 	$datum = date("d.m.y",$now);
 	$uhrzeit = date("G:i",$now);
-        echo "<h1>Status Nodes in Brohl/Binningen am $datum um $uhrzeit Uhr</h1> <br />";
+        echo "<h1>Status Nodes $datum um $uhrzeit Uhr</h1> <br />";
 	?>
 	<style>
 	table {
