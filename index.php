@@ -205,7 +205,7 @@ function print_table_head()
 {
 ?>
 <TABLE>
-	<tr><th>Status</th><th>Hostname/Kartenlink</th><th>Hardware</th><th>Software</th><th>Direkter Link</th><tr>
+	<tr><th>Status</th><th>Hostname/Kartenlink</th><th>Hardware</th><th>Software</th><th>IP</th><tr>
 <?php
 }
 
@@ -221,7 +221,7 @@ function print_table_data($router_info)
 		echo "<td>TODO</td>";
 		echo "<td>TODO</td>";
 		$ip = $router['ipv6'];
-		echo "<td> <a href=\"http://[".$ip."]\">link</a> </td>";
+		echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
 		echo "</tr>";
 
 	}
