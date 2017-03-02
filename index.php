@@ -36,14 +36,20 @@ $router_online = catch_information($nodes,$own_router_index_list,"online");
 # HTML HEAD
 print_html_head($now);
 
-# Zeige Tabelle Offline
-print_table($router_offline,"Offline");
+# Zeige Tabelle Kopf
+print_table_head();
 
-# Zeige Tabelle Uplink-Router
-print_table($router_uplink,"Online mit Uplink");
+# Zeige Nodes Offline
+print_table_data($router_offline);
 
-# Zeige Tabelle Online
-print_table($router_online,"Online");
+# Zeige Nodes Uplink-Router
+print_table_data($router_uplink);
+
+# Zeige Nodes Online
+print_table_data($router_online);
+
+# Zeige Tabelle Abschluss
+print_table_bot();
 
 # HTML BOT
 print_html_bot();
@@ -181,26 +187,34 @@ function format_date($zeit)
 	}
 }
 
-function print_table($router_info, $titel)
-
+function print_table_head()
 {
-	echo "<h2>$titel</h2>";
 ?>
-
-	<TABLE>
-	<tr><th>Hostname</th><th>Node-ID</th><th>Letze Nachricht vor</th><th>IP</th><tr>
+<TABLE>
+	<tr><th>Status</th><th>Hostname/Kartenlink</th><th>Hardware</th><th>Software</th><th>Direkter Link</th><tr>
 <?php
+}
+
+function print_table_data($router_info)
+{
 	# Tabelle füllen 
 	foreach ($router_info as $router){
 		echo "<tr>";
+		if ($router['online']) {$status = "<schwarz>online</schwarz>";}else{$status = "<rot>offline ".$router['lastseen']."</rot>";}
+		if ($router['online'] && $router['uplink']) {$status = "<gruen>online/uplink</gruen>";}
+		echo "<td>".$status."</td>";
 		echo "<td> <a href=\"https://map.freifunk-myk.de/#!v:m;n:".$router['node_id']."\">".$router['hostname']."</a></td>";
-		echo "<td>".$router['node_id']."</td>";
-		echo "<td>".$router['lastseen']."</td>";
+		echo "<td>TODO</td>";
+		echo "<td>TODO</td>";
 		$ip = $router['ipv6'];
-		echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
+		echo "<td> <a href=\"http://[".$ip."]\">link</a> </td>";
 		echo "</tr>";
 
 	}
+}
+
+function print_table_bot()
+{
 	echo "</TABLE><br />";
 }
 
@@ -233,7 +247,7 @@ function print_html_head($now)
 # Gibt unterer Teil der Seite aus
 function print_html_bot()
 {
-	echo "Quellcode"; 
+	echo "Quellcode:"; 
 	$adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
 	echo "<td> <a href=\"".$adresse."\">".$adresse."</a> </td>";
 	echo "</body>\n</html>";
