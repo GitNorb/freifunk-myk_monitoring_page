@@ -103,6 +103,17 @@ function catch_information($nodes,$index_own_nodes,$status)
 		# Nodeinfo - Network
 		$network = $nodeinfo['network'];
 		$addresses = $network['addresses'];
+
+		# Nodeinfo - Software - Firmware - Release
+		$base = $nodeinfo['software']['firmware']['base'];
+		$release = $nodeinfo['software']['firmware']['release'];
+		
+		# Nodeinfo - Hardware - model
+		$model = $nodeinfo['hardware']['model'];
+		# lösche folgende substrings in model
+		$hw = array("TP-Link TL-", "ALFA NETWORK", "N/ND");
+		$model = str_replace($hw, '', $model);
+
 		# Richtige IP wählen
 		if (startsWith($addresses['0'],"fe80:"))
 		{
@@ -116,7 +127,16 @@ function catch_information($nodes,$index_own_nodes,$status)
 		$flags = $node['flags'];
 		$online = $flags['online']; # WICHTIG
 		$uplink = $flags['uplink']; # WICHTIG
-		$inf_node = array("lastseen" => $lastseen, "hostname" => $hostname, "node_id" => $node_id,"ipv6" => $ipv6,"online" => $online,"uplink" => $uplink);
+		$inf_node = array(
+				"lastseen" => $lastseen,
+				"hostname" => $hostname,
+				"node_id" => $node_id,
+				"ipv6" => $ipv6,
+				"online" => $online,
+				"uplink" => $uplink,
+				"release" => $release,
+				"base" => $base,
+				"model" => $model);
 
 		# Hier Entscheide, ob offline, uplink oder online
 		if ($status == "offline")
@@ -218,8 +238,8 @@ function print_table_data($router_info)
 		if ($router['online'] && $router['uplink']) {$status = "<gruen>online/uplink</gruen>";}
 		echo "<td>".$status."</td>";
 		echo "<td> <a href=\"https://map.freifunk-myk.de/#!v:m;n:".$router['node_id']."\">".$router['hostname']."</a></td>";
-		echo "<td>TODO</td>";
-		echo "<td>TODO</td>";
+		echo "<td>".$router['model']."</td>";
+		echo "<td>".$router['base']."</td>";
 		$ip = $router['ipv6'];
 		echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
 		echo "</tr>";
