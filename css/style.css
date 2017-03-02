@@ -6,7 +6,7 @@ schwarz	{ color: black; }
 table {
 	font-family: Monaco, Courier New,Courier,Lucida Sans Typewriter,Lucida Typewriter,monospace;
 	font-weight: normal; /*normal, bold, bolder */
-	width:90%;
+	width:100%;
 }
 table, th, td {
 	padding: 2px 10px;
