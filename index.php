@@ -30,6 +30,10 @@ $router_offline = catch_information($nodes,$own_router_index_list,"offline");
 $router_uplink = catch_information($nodes,$own_router_index_list,"uplink");
 $router_online = catch_information($nodes,$own_router_index_list,"online");
 
+# Sortiere die drei Listen nach Hostnamen
+usort($router_offline, "compare_host");
+usort($router_uplink, "compare_host");
+usort($router_online, "compare_host");
 
 ##### AUSGABE #####
 
@@ -148,6 +152,16 @@ function catch_information($nodes,$index_own_nodes,$status)
 		}	
 	}	
 	return $own_nodes_list;
+}
+
+function compare_host($a, $b)
+{
+$hostname1 = $a['hostname'];
+$hostname2 = $b['hostname'];
+
+return strcmp ($hostname1,$hostname2);
+
+
 }
 
 function format_date($zeit)
