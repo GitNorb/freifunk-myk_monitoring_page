@@ -193,7 +193,7 @@ function print_table($router_info, $titel)
 	# Tabelle füllen 
 	foreach ($router_info as $router){
 		echo "<tr>";
-		echo "<td>".$router['hostname']."</td>";
+		echo "<td> <a href=\"https://map.freifunk-myk.de/#!v:m;n:".$router['node_id']."\">".$router['hostname']."</a></td>";
 		echo "<td>".$router['node_id']."</td>";
 		echo "<td>".$router['lastseen']."</td>";
 		$ip = $router['ipv6'];
