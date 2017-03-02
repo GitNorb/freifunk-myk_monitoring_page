@@ -106,12 +106,15 @@ function catch_information($nodes,$index_own_nodes,$status)
 
 		# Nodeinfo - Software - Firmware - Release
 		$base = $nodeinfo['software']['firmware']['base'];
+		# lösche folgende substrings in base
+		$hw = array("gluon-",);
+		$base = str_replace($hw, '', $base);
 		$release = $nodeinfo['software']['firmware']['release'];
 		
 		# Nodeinfo - Hardware - model
 		$model = $nodeinfo['hardware']['model'];
 		# lösche folgende substrings in model
-		$hw = array("TP-Link TL-", "ALFA NETWORK", "N/ND");
+		$hw = array("TP-Link", "ALFA NETWORK", "N/ND");
 		$model = str_replace($hw, '', $model);
 
 		# Richtige IP wählen
