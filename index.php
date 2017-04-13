@@ -1,6 +1,4 @@
 <?php
-
-
 # Skript zum Auswerten der Freifunk-Json
 # 1. Lese Node-ID aus nodes.txt
 # 2. Lade json
@@ -10,7 +8,9 @@
 ##### MAIN #####
 
 # Einlesen der Router
-$router_list = read_router_file();
+$router_list = read_router_url();
+#$router_list = read_router_file();
+
 
 # Einlesen der JSON in ein String
 $data_as_string = file_get_contents('https://map.freifunk-myk.de/hopglass/nodes.json');
@@ -54,6 +54,9 @@ print_table_data($router_online);
 
 # Zeige Tabelle Abschluss
 print_table_bot();
+
+# Formular zum Hinzufügen neuer Nodes
+print_form($router_list);
 
 # HTML BOT
 print_html_bot();
@@ -296,4 +299,25 @@ function read_router_file()
 	return explode("\n", file_get_contents('nodes.txt'));
 }
 
+# Nimmt die Router aus der URL
+function read_router_url()
+{
+	return explode(";", $_GET["nodeid"]);
+}
+
+function print_form($router_list)
+{
 ?>
+<br> 
+<form method="GET" action="index.php">
+<b>Nodeliste: <input name="nodeid" value="<?php echo implode(";",$router_list); ?>" > <input type=submit name=submit value="Exekutieren">
+</form>
+<br>
+<br> 
+<?php 
+}
+
+?>
+
+
+
