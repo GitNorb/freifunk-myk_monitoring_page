@@ -138,7 +138,7 @@ function catch_information($nodes,$index_own_nodes,$status)
 		# Flags
 		$flags = $node['flags'];
 		$online = $flags['online']; # WICHTIG
-		// $uplink = $flags['uplink']; # WICHTIG (kaputt)
+		# $uplink = $flags['uplink']; # WICHTIG (kaputt)
 		$inf_node = array(
 				"lastseen" => $lastseen,
 				"hostname" => $hostname,
