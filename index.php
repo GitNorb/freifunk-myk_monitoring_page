@@ -117,7 +117,7 @@ function catch_information($nodes,$index_own_nodes,$status)
 		# Nodeinfo - Hardware - model
 		$model = $nodeinfo['hardware']['model'];
 		# lösche folgende substrings in model
-		$hw = array("TP-Link", "ALFA NETWORK", "N/ND");
+		$hw = array("TP-Link", "TP-LINK", "ALFA NETWORK", "N/ND");
 		$model = str_replace($hw, '', $model);
 
 		# Richtige IP wählen
