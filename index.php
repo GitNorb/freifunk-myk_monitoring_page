@@ -120,6 +120,12 @@ function catch_information($nodes,$index_own_nodes,$status)
 		$hw = array("TP-Link", "TP-LINK", "ALFA NETWORK", "N/ND");
 		$model = str_replace($hw, '', $model);
 
+		# statistics - gateway/gateway_nexthop
+		$gateway = $node['statistics']['gateway'];
+		$gateway_nexthop = $node['statistics']['gateway_nexthop'];
+		# Uplink (Workaround, da Uplink direkt nicht mehr in der JSON steht)
+                $uplink = ($gateway == $gateway_nexthop); # WICHTIG
+
 		# Richtige IP wählen
 		if (startsWith($addresses['0'],"fe80:"))
 		{
@@ -132,7 +138,7 @@ function catch_information($nodes,$index_own_nodes,$status)
 		# Flags
 		$flags = $node['flags'];
 		$online = $flags['online']; # WICHTIG
-		$uplink = $flags['uplink']; # WICHTIG
+		// $uplink = $flags['uplink']; # WICHTIG (kaputt)
 		$inf_node = array(
 				"lastseen" => $lastseen,
 				"hostname" => $hostname,
