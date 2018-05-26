@@ -329,7 +329,8 @@ function print_html_bot()
 {
 	echo "Quellcode:"; 
 	$adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
-	echo "<td> <a href=\"".$adresse."\">".$adresse."</a> </td>";
+	echo "<td> <a href=\"".$adresse."\">".$adresse."</a> </td><br/>";
+	echo "Dieses Skript sammelt keinerlei Daten. Eventuell sammelt aber der Server, der diese Seite bereitstellt, Daten.<br/>Um der DSGVO zu entsprechen ist <a href=http://www.uni-koblenz-landau.de/de/koblenz/GHRKO/datenschutz/userpages>hier die Datenschutzerklärung vom Rechenzentrum der Uni Koblenz-Landau</a>, wo dieses Seite gehostet ist.";
 	echo "</body>\n</html>";
 }
 
