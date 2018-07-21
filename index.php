@@ -126,30 +126,6 @@ function catch_information($nodes,$index_own_nodes,$status)
 		# Uplink (Workaround, da Uplink direkt nicht mehr in der JSON steht)
                 $uplink = ($gateway == $gateway_nexthop); # WICHTIG
 
-		# Kanalstörung
-		# statistics - wireless - airtime - rx/tx/wait/free
-		$rx = $node['statistics']['wireless']['airtime2']['rx'];
-		$tx = $node['statistics']['wireless']['airtime2']['tx'];
-		$wait = $node['statistics']['wireless']['airtime2']['wait'];
-		$free = $node['statistics']['wireless']['airtime2']['free'];
-
-		# Formatieren
-                $rx = $rx*100;
-		$rx = number_format($rx,0,',','');
-                $rx = $rx."%";
-
-                $tx = $tx*100;
-		$tx = number_format($tx,0,',','');
-                $tx = $tx."%";
-
-                $wait = $wait*100;
-		$wait = number_format($wait,0,',','');
-                $wait = $wait."%";
-
-                $free = $free*100;
-		$free = number_format($free,0,',','');
-                $free = $free."%";
-
 		# Richtige IP wählen
 		if (startsWith($addresses['0'],"fe80:"))
 		{
@@ -174,11 +150,7 @@ function catch_information($nodes,$index_own_nodes,$status)
 				"uplink" => $uplink,
 				"release" => $release,
 				"base" => $base,
-				"model" => $model,
-				"rx" => $rx,
-				"tx" => $tx,
-				"wait" => $wait,
-				"free" => $free);
+				"model" => $model,);
 
 		# Hier Entscheide, ob offline, uplink oder online
 		if ($status == "offline")
@@ -267,7 +239,7 @@ function print_table_head()
 {
 ?>
 <TABLE>
-	<tr><th>Status</th><th>Hostname/Kartenlink</th><th>Hardware</th><th>Software</th><th>IP</th><th>RX</th><th>TX</th><th>WAIT</th><th>FREE</th><tr>
+	<tr><th>Status</th><th>Hostname/Kartenlink</th><th>Hardware</th><th>Software</th><th>IP</th><tr>
 <?php
 }
 
@@ -284,10 +256,6 @@ function print_table_data($router_info)
 		echo "<td>".$router['base']."</td>";
 		$ip = $router['ipv6'];
 		echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
-		echo "<td>".$router['rx']."</td>";
-		echo "<td>".$router['tx']."</td>";
-		echo "<td>".$router['wait']."</td>";
-		echo "<td>".$router['free']."</td>";
 		echo "</tr>";
 
 	}
