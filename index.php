@@ -13,7 +13,7 @@ $router_list = read_router_url();
 
 
 # Einlesen der JSON in ein String
-$data_as_string = file_get_contents('https://map.freifunk-myk.de/hopglass/nodes.json');
+$data_as_string = file_get_contents('https://map.freifunk-myk.de/data/meshviewer.json');
 
 # Decode JSON
 $data = json_decode($data_as_string,true);
@@ -74,8 +74,7 @@ function search_own_router($all_nodes,$own_nodes)
 	$i = 0;
 	foreach ($all_nodes as $node)
 	{
-		$nodeinfo = $node['nodeinfo'];
-		$node_id = $nodeinfo['node_id'];
+		$node_id = $node['node_id'];
 		foreach ($own_nodes as $own_id)
 		{
 			if ($own_id == $node_id)
@@ -99,30 +98,24 @@ function catch_information($nodes,$index_own_nodes,$status)
 		$push = false;
 		$node = $nodes[$index];
 		$lastseen = format_date($node['lastseen']); # WICHTIG
-		# Nodeinfo
-		$nodeinfo = $node['nodeinfo'];
-		$hostname = $nodeinfo['hostname']; # WICHTIG
-		$node_id = $nodeinfo['node_id']; # WICHTIG
-		# Nodeinfo - Network
-		$network = $nodeinfo['network'];
-		$addresses = $network['addresses'];
 
-		# Nodeinfo - Software - Firmware - Release
-		$base = $nodeinfo['software']['firmware']['base'];
+		$hostname = $node['hostname']; # WICHTIG
+		$node_id = $node['node_id']; # WICHTIG
+		$addresses = $node['addresses'];
+
+		$base = $node['firmware']['base'];
 		# lösche folgende substrings in base
 		$hw = array("gluon-",);
 		$base = str_replace($hw, '', $base);
-		$release = $nodeinfo['software']['firmware']['release'];
+		$release = $node['firmware']['release'];
 		
-		# Nodeinfo - Hardware - model
-		$model = $nodeinfo['hardware']['model'];
+		$model = $node['model'];
 		# lösche folgende substrings in model
 		$hw = array("TP-Link", "TP-LINK", "ALFA NETWORK", "N/ND");
 		$model = str_replace($hw, '', $model);
 
-		# statistics - gateway/gateway_nexthop
-		$gateway = $node['statistics']['gateway'];
-		$gateway_nexthop = $node['statistics']['gateway_nexthop'];
+		$gateway = $node['gateway'];
+		$gateway_nexthop = $node['gateway_nexthop'];
 		# Uplink (Workaround, da Uplink direkt nicht mehr in der JSON steht)
                 $uplink = ($gateway == $gateway_nexthop); # WICHTIG
 
@@ -136,8 +129,7 @@ function catch_information($nodes,$index_own_nodes,$status)
 			$ipv6 = $addresses['0']; # WICHTIG
 		}
 		# Flags
-		$flags = $node['flags'];
-		$online = $flags['online']; # WICHTIG
+		$online = $node['is_online']; # WICHTIG
 		# $uplink = $flags['uplink']; # WICHTIG (kaputt)
 
 		# Speichere Werter zur Übergabe
@@ -251,7 +243,7 @@ function print_table_data($router_info)
 		if ($router['online']) {$status = "<schwarz>online</schwarz>";}else{$status = "<rot>offline ".$router['lastseen']."</rot>";}
 		if ($router['online'] && $router['uplink']) {$status = "<gruen>online/uplink</gruen>";}
 		echo "<td>".$status."</td>";
-		echo "<td> <a href=\"https://map.freifunk-myk.de/#!v:m;n:".$router['node_id']."\">".$router['hostname']."</a></td>";
+		echo "<td> <a href=\"https://map.freifunk-myk.de/#!/de/map/".$router['node_id']."\">".$router['hostname']."</a></td>";
 		echo "<td>".$router['model']."</td>";
 		echo "<td>".$router['base']."</td>";
 		$ip = $router['ipv6'];
@@ -327,6 +319,3 @@ function print_form($router_list)
 }
 
 ?>
-
-
-
