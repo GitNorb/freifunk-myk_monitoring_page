@@ -16,19 +16,19 @@ $router_list = read_router_url();
 $data_as_string = file_get_contents('https://map.freifunk-myk.de/data/meshviewer.json');
 
 # Decode JSON
-$data = json_decode($data_as_string,true);
+$data = json_decode($data_as_string, true);
 
 # Zeit ermitteln
 $now = strtotime($data['timestamp']);
 
 # Suche die eigenen Router aus den Daten
 $nodes = $data['nodes'];
-$own_router_index_list = search_own_router($nodes,$router_list);
+$own_router_index_list = search_own_router($nodes, $router_list);
 
 # Iteriere über eigene Router und sammel Informationen
-$router_offline = catch_information($nodes,$own_router_index_list,"offline"); 
-$router_uplink = catch_information($nodes,$own_router_index_list,"uplink");
-$router_online = catch_information($nodes,$own_router_index_list,"online");
+$router_offline = catch_information($nodes, $own_router_index_list, "offline");
+$router_uplink = catch_information($nodes, $own_router_index_list, "uplink");
+$router_online = catch_information($nodes, $own_router_index_list, "online");
 
 # Sortiere die drei Listen nach Hostnamen
 usort($router_offline, "compare_host");
@@ -67,255 +67,238 @@ print_html_bot();
 # Suche relevante Router
 # Eingabe: Array, Liste eigener Router
 # Ausgabe: Indizes relevanter Router
-function search_own_router($all_nodes,$own_nodes)
+function search_own_router($all_nodes, $own_nodes)
 {
-	# Deklariere Array
-	$own_router_index = array();
-	$i = 0;
-	foreach ($all_nodes as $node)
-	{
-		$node_id = $node['node_id'];
-		foreach ($own_nodes as $own_id)
-		{
-			if ($own_id == $node_id)
-			{
-				array_push($own_router_index,$i);
-			}
-		}
-		$i=$i+1;
-	}
-	return $own_router_index;
+    # Deklariere Array
+    $own_router_index = array();
+    $i = 0;
+    foreach ($all_nodes as $node) {
+        $node_id = $node['node_id'];
+        foreach ($own_nodes as $own_id) {
+            if ($own_id == $node_id) {
+                array_push($own_router_index, $i);
+            }
+        }
+        $i = $i + 1;
+    }
+    return $own_router_index;
 }
 
 # Extrahiere Routerinformationen
 # Eingabe Liste Nodes, Index eigene Nodes
 # Ausgabe Routerliste mit Infors zum Router
-function catch_information($nodes,$index_own_nodes,$status)
+function catch_information($nodes, $index_own_nodes, $status)
 {
-	$own_nodes_list = array();
-	foreach ($index_own_nodes as $index)
-	{
-		$push = false;
-		$node = $nodes[$index];
-		$lastseen = format_date($node['lastseen']); # WICHTIG
+    $own_nodes_list = array();
+    foreach ($index_own_nodes as $index) {
+        $push = false;
+        $node = $nodes[$index];
+        $lastseen = format_date($node['lastseen']); # WICHTIG
 
-		$hostname = $node['hostname']; # WICHTIG
-		$node_id = $node['node_id']; # WICHTIG
-		$addresses = $node['addresses'];
+        $hostname = $node['hostname']; # WICHTIG
+        $node_id = $node['node_id']; # WICHTIG
+        $addresses = $node['addresses'];
 
-		$base = $node['firmware']['base'];
-		# lösche folgende substrings in base
-		$hw = array("gluon-",);
-		$base = str_replace($hw, '', $base);
-		$release = $node['firmware']['release'];
-		
-		$model = $node['model'];
-		# lösche folgende substrings in model
-		$hw = array("TP-Link", "TP-LINK", "ALFA NETWORK", "N/ND");
-		$model = str_replace($hw, '', $model);
+        $base = $node['firmware']['base'];
+        # lösche folgende substrings in base
+        $hw = array("gluon-",);
+        $base = str_replace($hw, '', $base);
+        $release = $node['firmware']['release'];
 
-		$gateway = $node['gateway'];
-		$gateway_nexthop = $node['gateway_nexthop'];
-		# Uplink (Workaround, da Uplink direkt nicht mehr in der JSON steht)
-                $uplink = ($gateway == $gateway_nexthop); # WICHTIG
+        $model = $node['model'];
+        # lösche folgende substrings in model
+        $hw = array("TP-Link", "TP-LINK", "ALFA NETWORK", "N/ND");
+        $model = str_replace($hw, '', $model);
 
-		# Richtige IP wählen
-		if (startsWith($addresses['0'],"fe80:"))
-		{
-			$ipv6 = $addresses['1']; # WICHTIG
-		}
-		else
-		{
-			$ipv6 = $addresses['0']; # WICHTIG
-		}
-		# Flags
-		$online = $node['is_online']; # WICHTIG
-		# $uplink = $flags['uplink']; # WICHTIG (kaputt)
+        $gateway = $node['gateway'];
+        $gateway_nexthop = $node['gateway_nexthop'];
+        # Uplink (Workaround, da Uplink direkt nicht mehr in der JSON steht)
+        $uplink = ($gateway == $gateway_nexthop); # WICHTIG
 
-		# Speichere Werter zur Übergabe
-		$inf_node = array(
-				"lastseen" => $lastseen,
-				"hostname" => $hostname,
-				"node_id" => $node_id,
-				"ipv6" => $ipv6,
-				"online" => $online,
-				"uplink" => $uplink,
-				"release" => $release,
-				"base" => $base,
-				"model" => $model,);
+        # Richtige IP wählen
+        if (startsWith($addresses['0'], "fe80:")) {
+            $ipv6 = $addresses['1']; # WICHTIG
+        } else {
+            $ipv6 = $addresses['0']; # WICHTIG
+        }
+        # Flags
+        $online = $node['is_online']; # WICHTIG
+        # $uplink = $flags['uplink']; # WICHTIG (kaputt)
 
-		# Hier Entscheide, ob offline, uplink oder online
-		if ($status == "offline")
-		{
-			if (! $online)
-			{
-				$push = true;
-			}
-		} 
-		else
-		{
-			if ($status == "uplink")
-			{
-				if ($uplink and $online)
-				{
-					$push = true;
-				}
-			}
-			else
-			{
-				if ($status == "online")
-				{
-					if ($online and ! $uplink)
-					{
-						$push = true;
-					}
-				}
-			}
-		}
-		if ($push)
-		{
-			array_push($own_nodes_list,$inf_node);
-		}	
-	}	
-	return $own_nodes_list;
+        # Speichere Werter zur Übergabe
+        $inf_node = array(
+            "lastseen" => $lastseen,
+            "hostname" => $hostname,
+            "node_id" => $node_id,
+            "ipv6" => $ipv6,
+            "online" => $online,
+            "uplink" => $uplink,
+            "release" => $release,
+            "base" => $base,
+            "model" => $model,);
+
+        # Hier Entscheide, ob offline, uplink oder online
+        if ($status == "offline") {
+            if (!$online) {
+                $push = true;
+            }
+        } else {
+            if ($status == "uplink") {
+                if ($uplink and $online) {
+                    $push = true;
+                }
+            } else {
+                if ($status == "online") {
+                    if ($online and !$uplink) {
+                        $push = true;
+                    }
+                }
+            }
+        }
+        if ($push) {
+            array_push($own_nodes_list, $inf_node);
+        }
+    }
+    return $own_nodes_list;
 }
 
 function compare_host($a, $b)
 {
-$hostname1 = $a['hostname'];
-$hostname2 = $b['hostname'];
+    $hostname1 = $a['hostname'];
+    $hostname2 = $b['hostname'];
 
-return strcmp ($hostname1,$hostname2);
+    return strcmp($hostname1, $hostname2);
 
 
 }
 
 function format_date($zeit)
 {
-	global $now; # Nimm die Globale now
-	$in_time = strtotime($zeit);
+    global $now; # Nimm die Globale now
+    $in_time = strtotime($zeit);
 
-	$now = time(); # TODO Hier Serverzeit
+    $now = time();
 
-	$differenz = $now - $in_time;
-	$tag  = floor($differenz / (3600*24));
-	$std  = floor($differenz / 3600 % 24);
-	$min  = floor($differenz / 60 % 60);
-	$sek  = floor($differenz % 60);
+    $differenz = $now - $in_time;
+    $tag = floor($differenz / (3600 * 24));
+    $std = floor($differenz / 3600 % 24);
+    $min = floor($differenz / 60 % 60);
+    $sek = floor($differenz % 60);
 
 
-	if ($tag > 0)
-	{
-		return "$tag Tag(e)";
-	}
-	if ($std > 0)
-	{
-		return "$std Stunde(n)";
-	}
-	if ($min > 0)
-	{
-		return "$min Minute(n)";
-	}
-	if ($sek > 0)
-	{
-		return "$sek Sekunde(n)";
-	}
-	if ($sek < 0 or $sek = 0)
-	{
-		return "einige Sekunden";
-
-	}
+    if ($tag > 0) {
+        return "$tag Tag(e)";
+    }
+    if ($std > 0) {
+        return "$std Stunde(n)";
+    }
+    if ($min > 0) {
+        return "$min Minute(n)";
+    }
+    if ($sek > 0) {
+        return "$sek Sekunde(n)";
+    }
+    #if ($sek < 0 or $sek = 0)
+    return "einige Sekunden";
 }
 
 function print_table_head()
 {
 ?>
 <TABLE>
-	<tr><th>Status</th><th>Hostname/Kartenlink</th><th>Hardware</th><th>Software</th><th>IP</th><tr>
-<?php
-}
+    <tr>
+        <th>Status</th>
+        <th>Hostname/Kartenlink</th>
+        <th>Hardware</th>
+        <th>Software</th>
+        <th>IP</th>
+    <tr>
+        <?php
+        }
 
-function print_table_data($router_info)
-{
-	# Tabelle füllen 
-	foreach ($router_info as $router){
-		echo "<tr>";
-		if ($router['online']) {$status = "<schwarz>online</schwarz>";}else{$status = "<rot>offline ".$router['lastseen']."</rot>";}
-		if ($router['online'] && $router['uplink']) {$status = "<gruen>online/uplink</gruen>";}
-		echo "<td>".$status."</td>";
-		echo "<td> <a href=\"https://map.freifunk-myk.de/#!/de/map/".$router['node_id']."\">".$router['hostname']."</a></td>";
-		echo "<td>".$router['model']."</td>";
-		echo "<td>".$router['base']."</td>";
-		$ip = $router['ipv6'];
-		echo "<td> <a href=\"http://[".$ip."]\">".$ip."</a> </td>";
-		echo "</tr>";
+        function print_table_data($router_info)
+        {
+            # Tabelle füllen
+            foreach ($router_info as $router) {
+                echo "<tr>";
+                if ($router['online']) {
+                    $status = "<schwarz>online</schwarz>";
+                } else {
+                    $status = "<rot>offline " . $router['lastseen'] . "</rot>";
+                }
+                if ($router['online'] && $router['uplink']) {
+                    $status = "<gruen>online/uplink</gruen>";
+                }
+                echo "<td>" . $status . "</td>";
+                echo "<td> <a href=\"https://map.freifunk-myk.de/#!/de/map/" . $router['node_id'] . "\">" . $router['hostname'] . "</a></td>";
+                echo "<td>" . $router['model'] . "</td>";
+                echo "<td>" . $router['base'] . "</td>";
+                $ip = $router['ipv6'];
+                echo "<td> <a href=\"http://[" . $ip . "]\">" . $ip . "</a> </td>";
+                echo "</tr>";
 
-	}
-}
+            }
+        }
 
-function print_table_bot()
-{
-	echo "</TABLE><br />";
-}
+        function print_table_bot()
+        {
+            echo "</TABLE><br />";
+        }
 
-# Hilfsfunktion
-# Gibt 1 zurück, wenn String mit Substring startet
-function startsWith($haystack, $needle)
-{
-	$length = strlen($needle);
-	return (substr($haystack, 0, $length) === $needle);
-}
+        # Hilfsfunktion
+        # Gibt 1 zurück, wenn String mit Substring startet
+        function startsWith($haystack, $needle)
+        {
+            $length = strlen($needle);
+            return (substr($haystack, 0, $length) === $needle);
+        }
 
-# Gibt oberer Teil der Seite aus
-function print_html_head($now)
-{
-?>
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset='UTF-8' />
-		<title> Freifunk</title>
-		<link rel=stylesheet type="text/css" href="css/style.css">
-	</head>
-	<body>
-<?php
-	$datum = date("d.m.y",$now);
-	$uhrzeit = date("G:i",$now);
-	echo "<h1>Status Nodes $datum um $uhrzeit Uhr</h1> <br />";
-}
+        # Gibt oberer Teil der Seite aus
+        function print_html_head($now)
+        {
+        ?>
+        <!DOCTYPE html>
+        <html lang="de">
+        <head>
+            <meta charset='UTF-8'/>
+            <title> Freifunk</title>
+            <link rel=stylesheet type="text/css" href="css/style.css">
+        </head>
+        <body>
+        <?php
+        $datum = date("d.m.y", $now);
+        $uhrzeit = date("G:i", $now);
+        echo "<h1>Status Nodes $datum um $uhrzeit Uhr</h1> <br />";
+        }
 
-# Gibt unterer Teil der Seite aus
-function print_html_bot()
-{
-	echo "Quellcode:"; 
-	$adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
-	echo "<td> <a href=\"".$adresse."\">".$adresse."</a> </td><br/>";
-	echo "Dieses Skript sammelt keinerlei Daten. Eventuell sammelt aber der Server, der diese Seite bereitstellt, Daten.<br/>Um der DSGVO zu entsprechen ist <a href=https://www.uni-koblenz-landau.de/de/koblenz/GHRKO/datenschutz/userpages>hier die Datenschutzerklärung vom Rechenzentrum der Uni Koblenz-Landau</a>, wo dieses Seite gehostet ist.";
-	echo "</body>\n</html>";
-}
+        # Gibt unterer Teil der Seite aus
+        function print_html_bot()
+        {
+            echo "Quellcode:";
+            $adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
+            echo "<td> <a href=\"" . $adresse . "\">" . $adresse . "</a> </td><br/>";
+            echo "Dieses Skript sammelt keinerlei Daten. Eventuell sammelt aber der Server, der diese Seite bereitstellt, Daten.<br/>Um der DSGVO zu entsprechen ist <a href=https://www.uni-koblenz-landau.de/de/koblenz/GHRKO/datenschutz/userpages>hier die Datenschutzerklärung vom Rechenzentrum der Uni Koblenz-Landau</a>, wo dieses Seite gehostet ist.";
+            echo "</body>\n</html>";
+        }
 
-# List die Datei mit den Node-IDs ein und gibt ein Array mit dienen zurück
-function read_router_file()
-{
-	return explode("\n", file_get_contents('nodes.txt'));
-}
 
-# Nimmt die Router aus der URL
-function read_router_url()
-{
-	return explode(";", $_GET["nodeid"]);
-}
+        # Nimmt die Router aus der URL
+        function read_router_url()
+        {
+            return explode(";", $_GET["nodeid"]);
+        }
 
-function print_form($router_list)
-{
-?>
-<br> 
-<form method="GET" action="index.php">
-<b>Nodeliste: <input name="nodeid" value="<?php echo implode(";",$router_list); ?>" > <input type=submit name=submit value="Exekutieren">
-</form>
-<br>
-<br> 
-<?php 
-}
-
-?>
+        function print_form($router_list)
+        {
+            ?>
+            <br>
+            <form method="GET" action="index.php">
+                <b>Nodeliste: <input name="nodeid" value="<?php echo implode(";", $router_list); ?>"> <input type=submit
+                                                                                                             name=submit
+                                                                                                             value="Exekutieren">
+            </form>
+            <br>
+            <br>
+            <?php
+        }
+        ?>
