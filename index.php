@@ -168,8 +168,6 @@ function compare_host($a, $b)
     $hostname2 = $b['hostname'];
 
     return strcmp($hostname1, $hostname2);
-
-
 }
 
 function format_date($zeit)
@@ -184,7 +182,6 @@ function format_date($zeit)
     $std = floor($differenz / 3600 % 24);
     $min = floor($differenz / 60 % 60);
     $sek = floor($differenz % 60);
-
 
     if ($tag > 0) {
         return "$tag Tag(e)";
@@ -204,101 +201,93 @@ function format_date($zeit)
 
 function print_table_head()
 {
-?>
-<TABLE>
+    echo '<TABLE>
     <tr>
         <th>Status</th>
         <th>Hostname/Kartenlink</th>
         <th>Hardware</th>
         <th>Software</th>
         <th>IP</th>
-    <tr>
-        <?php
+    <tr>';
+}
+
+function print_table_data($router_info)
+{
+    # Tabelle füllen
+    foreach ($router_info as $router) {
+        echo "<tr>";
+        if ($router['online']) {
+            $status = "<schwarz>online</schwarz>";
+        } else {
+            $status = "<rot>offline " . $router['lastseen'] . "</rot>";
         }
-
-        function print_table_data($router_info)
-        {
-            # Tabelle füllen
-            foreach ($router_info as $router) {
-                echo "<tr>";
-                if ($router['online']) {
-                    $status = "<schwarz>online</schwarz>";
-                } else {
-                    $status = "<rot>offline " . $router['lastseen'] . "</rot>";
-                }
-                if ($router['online'] && $router['uplink']) {
-                    $status = "<gruen>online/uplink</gruen>";
-                }
-                echo "<td>" . $status . "</td>";
-                echo "<td> <a href=\"https://map.freifunk-myk.de/#!/de/map/" . $router['node_id'] . "\">" . $router['hostname'] . "</a></td>";
-                echo "<td>" . $router['model'] . "</td>";
-                echo "<td>" . $router['base'] . "</td>";
-                $ip = $router['ipv6'];
-                echo "<td> <a href=\"http://[" . $ip . "]\">" . $ip . "</a> </td>";
-                echo "</tr>";
-
-            }
+        if ($router['online'] && $router['uplink']) {
+            $status = "<gruen>online/uplink</gruen>";
         }
+        echo "<td>" . $status . "</td>";
+        echo "<td> <a href=\"https://map.freifunk-myk.de/#!/de/map/" . $router['node_id'] . "\">" . $router['hostname'] . "</a></td>";
+        echo "<td>" . $router['model'] . "</td>";
+        echo "<td>" . $router['base'] . "</td>";
+        $ip = $router['ipv6'];
+        echo "<td> <a href=\"http://[" . $ip . "]\">" . $ip . "</a> </td>";
+        echo "</tr>";
+    }
+}
 
-        function print_table_bot()
-        {
-            echo "</TABLE><br />";
-        }
+function print_table_bot()
+{
+    echo "</TABLE><br>";
+}
 
-        # Hilfsfunktion
-        # Gibt 1 zurück, wenn String mit Substring startet
-        function startsWith($haystack, $needle)
-        {
-            $length = strlen($needle);
-            return (substr($haystack, 0, $length) === $needle);
-        }
+# Hilfsfunktion
+# Gibt 1 zurück, wenn String mit Substring startet
+function startsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    return (substr($haystack, 0, $length) === $needle);
+}
 
-        # Gibt oberer Teil der Seite aus
-        function print_html_head($now)
-        {
-        ?>
-        <!DOCTYPE html>
+# Gibt oberer Teil der Seite aus
+function print_html_head($now)
+{
+    echo '<!DOCTYPE html>
         <html lang="de">
         <head>
-            <meta charset='UTF-8'/>
+            <meta charset="UTF-8"/>
             <title> Freifunk</title>
             <link rel=stylesheet type="text/css" href="css/style.css">
         </head>
-        <body>
-        <?php
-        $datum = date("d.m.y", $now);
-        $uhrzeit = date("G:i", $now);
-        echo "<h1>Status Nodes $datum um $uhrzeit Uhr</h1> <br />";
-        }
+        <body>';
+    $datum = date("d.m.y", $now);
+    $uhrzeit = date("G:i", $now);
+    echo "<h1>Status Nodes $datum um $uhrzeit Uhr</h1> <br />";
+}
 
-        # Gibt unterer Teil der Seite aus
-        function print_html_bot()
-        {
-            echo "Quellcode:";
-            $adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
-            echo "<td> <a href=\"" . $adresse . "\">" . $adresse . "</a> </td><br/>";
-            echo "Dieses Skript sammelt keinerlei Daten. Eventuell sammelt aber der Server, der diese Seite bereitstellt, Daten.<br/>Um der DSGVO zu entsprechen ist <a href=https://www.uni-koblenz-landau.de/de/koblenz/GHRKO/datenschutz/userpages>hier die Datenschutzerklärung vom Rechenzentrum der Uni Koblenz-Landau</a>, wo dieses Seite gehostet ist.";
-            echo "</body>\n</html>";
-        }
+# Gibt unterer Teil der Seite aus
+function print_html_bot()
+{
+    echo "Quellcode:";
+    $adresse = "https://github.com/GitNorb/freifunk-myk_monitoring_page";
+    echo "<td> <a href=\"" . $adresse . "\">" . $adresse . "</a> </td><br/>";
+    echo "Dieses Skript sammelt keinerlei Daten. Eventuell sammelt aber der Server, der diese Seite bereitstellt, Daten.<br/>Um der DSGVO zu entsprechen ist <a href=https://www.uni-koblenz-landau.de/de/koblenz/GHRKO/datenschutz/userpages>hier die Datenschutzerklärung vom Rechenzentrum der Uni Koblenz-Landau</a>, wo dieses Seite gehostet ist.";
+    echo "</body>\n</html>";
+}
 
 
-        # Nimmt die Router aus der URL
-        function read_router_url()
-        {
-            return explode(";", $_GET["nodeid"]);
-        }
+# Nimmt die Router aus der URL
+function read_router_url()
+{
+    return explode(";", $_GET["nodeid"]);
+}
 
-        function print_form($router_list)
-        {
-            ?>
-            <br>
-            <form method="GET" action="index.php">
-                <b>Nodeliste: <input name="nodeid" value="<?php echo implode(";", $router_list); ?>"> <input type=submit
-                                                                                                             name=submit
-                                                                                                             value="Exekutieren">
-            </form>
-            <br>
-            <br>
-            <?php
-        }
-        ?>
+function print_form($router_list)
+{
+    echo '<br>';
+    echo '<form method="GET" action="index.php">';
+    echo '<b>Nodeliste: <input name="nodeid" value="';
+    echo implode(";", $router_list);
+    echo '"> <input type=submit name=submit value="Exekutieren">';
+    echo '</form> <br> <br>';
+}
+
+?>
